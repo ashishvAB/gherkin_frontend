@@ -1,0 +1,51 @@
+.right-side-panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+.text-editor {
+  flex-grow: 1;
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  resize: none;
+  font-size: 1rem;
+}
+.clear-editor-btn-container {
+  display: flex;
+  width: 45%;
+  margin-bottom: 1rem;
+}
+
+.markdown-container {
+padding: 16px;
+background-color: #f9f9f9; /* Light background for Markdown */
+border: 1px solid #ddd; /* Border for styling */
+border-radius: 4px;
+font-family: 'Courier New', Courier, monospace; /* Use monospace for Gherkin content */
+overflow-y: auto;
+max-height: 100vh; /* Set a maximum height for scrollability */
+}
+
+.markdown-container h2, .markdown-container h3 {
+color: #2a7ae4; /* Blue headings */
+}
+
+.markdown-container pre, .markdown-container code {
+background-color: #f4f4f4;
+padding: 4px;
+border-radius: 4px;
+font-family: 'Courier New', Courier, monospace;
+}
+
+.markdown-container p {
+margin: 8px 0;
+color: #333;
+}
