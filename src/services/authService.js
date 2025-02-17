@@ -1,11 +1,11 @@
 import axios from 'axios';
 
-const API_URL = (process.env.API_URL || 'https://gherkin-backend.onrender.com/api') + '/auth';
+const AUTH_API_URL = process.env.REACT_APP_API_URL  + 'auth';
 
 export const authService = {
     async loginWithGoogle(googleToken) {
         try {
-            const response = await axios.post(`${API_URL}/google`, {
+            const response = await axios.post(`${AUTH_API_URL}/google`, {
                 token: googleToken
             });
             
@@ -27,7 +27,7 @@ export const authService = {
             const user = JSON.parse(localStorage.getItem('user'));
             if (!user) return null;
 
-            const response = await axios.get(`${API_URL}/me`, {
+            const response = await axios.get(`${AUTH_API_URL}/me`, {
                 headers: { Authorization: `Bearer ${user.access_token}` }
             });
             return response.data;
@@ -44,7 +44,7 @@ export const authService = {
 
     async register(userData) {
         try {
-            const response = await axios.post(`${API_URL}/register`, {
+            const response = await axios.post(`${AUTH_API_URL}/register`, {
                 name: userData.name,
                 email: userData.email,
                 password: userData.password
@@ -58,7 +58,7 @@ export const authService = {
     async login(credentials) {
         try {
             console.log('Attempting login with:', credentials);
-            const response = await axios.post(`${API_URL}/login`, credentials);
+            const response = await axios.post(`${AUTH_API_URL}/login`, credentials);
             console.log('Login response:', response.data);
             
             if (response.data.access_token) {

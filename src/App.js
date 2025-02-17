@@ -8,6 +8,7 @@ import Register from './components/Auth/Register';
 import './App.css';
 
 function App() {
+  console.log(process.env.REACT_APP_API_URL);
   return (
     <Router>
       <div className="app-container">
