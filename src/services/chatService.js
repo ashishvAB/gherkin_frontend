@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { authHeader } from '../utils/authHeader';
 
-const API_URL = process.env.API_URL +'/chat';
+const API_URL = (process.env.API_URL || 'https://gherkin-backend.onrender.com/api') + '/chat';
 
 export const chatService = {
     async getChatHistory() {

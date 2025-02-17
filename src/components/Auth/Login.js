@@ -43,35 +43,47 @@ function Login() {
 
   return (
     <div className="login-container">
-      <form className="login-form" onSubmit={handleSubmit}>
-        <h2>Login</h2>
-        {error && <div className="error-message">{error}</div>}
-        <div className="form-group">
-          <input
-            type="email"
-            placeholder="Email"
-            value={credentials.email}
-            onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <input
-            type="password"
-            placeholder="Password"
-            value={credentials.password}
-            onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-            required
-          />
-        </div>
-        <button type="submit">Login</button>
-        <div className="form-footer">
-          Don't have an account?{' '}
-          <span onClick={() => navigate('/register')} className="link">
-            Register here
-          </span>
-        </div>
-      </form>
+      <div className="login-card">
+        <form className="login-form" onSubmit={handleSubmit}>
+          <h1 className="login-title">Welcome Back</h1>
+          <p className="login-subtitle">Please enter your details</p>
+          
+          {error && <div className="error-message">{error}</div>}
+          
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              value={credentials.email}
+              onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              value={credentials.password}
+              onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+              required
+            />
+          </div>
+
+          <button type="submit" className="login-button">
+            Sign in
+          </button>
+
+          <p className="register-prompt">
+            Don't have an account?{' '}
+            <span onClick={() => navigate('/register')} className="register-link">
+              Sign up
+            </span>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }
