@@ -39,6 +39,7 @@ export const authService = {
 
     logout() {
         localStorage.removeItem('user');
+        localStorage.removeItem('token');
     },
 
     async register(userData) {

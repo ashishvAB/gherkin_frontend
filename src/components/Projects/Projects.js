@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { projectService } from '../../services/projectService';
+import { authService } from '../../services/authService';
 import './Projects.css';
 
 function Projects() {
@@ -53,9 +54,20 @@ function Projects() {
     navigate(`/project/${projectId}`);
   };
 
+  const handleLogout = () => {
+    authService.logout();
+    setProjects([]);
+    navigate('/login');
+  };
+
   return (
     <div className="projects-container">
-      <h1>My Projects</h1>
+      <div className="header-container">
+        <h1>My Projects</h1>
+        <button className="logout-button" onClick={handleLogout}>
+          Logout
+        </button>
+      </div>
       
       <form className="create-project-form" onSubmit={createProject}>
         <input
