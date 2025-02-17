@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { authHeader } from '../utils/authHeader';
 
-const API_URL = process.env.REACT_APP_API_URL  + 'files';
+const API_URL = (process.env.REACT_APP_API_URL || 'https://gherkin-backend.onrender.com/api') + '/files';
 export const fileService = {
     async uploadFile(projectId, chatId, file) {
         const formData = new FormData();

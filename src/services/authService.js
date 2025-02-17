@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const AUTH_API_URL = process.env.REACT_APP_API_URL  + 'auth';
+const AUTH_API_URL = (process.env.REACT_APP_API_URL || 'https://gherkin-backend.onrender.com/api') +'/auth';
 
 export const authService = {
     async loginWithGoogle(googleToken) {
