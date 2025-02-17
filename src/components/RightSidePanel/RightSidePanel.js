@@ -38,38 +38,36 @@ function RightSidePanel({ testCases, onClearEditor}) {
       <div className="right-side-panel">
         <div className="header">
           <div className="title">Test Cases</div>
-          <Card className="files-card">
-            <Typography variant="subtitle2" sx={{ p: 1, fontWeight: 'bold' }}>
-              Pages
-            </Typography>
-
-            <div className="files-list">
-              {pages && pages.length > 0 ? (
-                pages.map((page, index) => (
-                  <Typography key={index} variant="body2" sx={{ px: 1, pb: 0.5 }}>
-                    {page.name}
-                  </Typography>
-                ))
-              ) : (
-                <Typography variant="body2" sx={{ px: 1, pb: 0.5, fontStyle: 'italic' }}>
-                  No pages available
-                </Typography>
-              )}
-            </div>
-            
-          </Card>
           <div className="clear-editor-btn-container">  
-          <Button 
-            onClick={handleClearEditor}
-            variant="contained"
-            color="primary"
-            size="small"
-            className="clear-button"
-          >
-            Clear Editor
-          </Button>
+            <Button 
+              onClick={handleClearEditor}
+              variant="contained"
+              color="primary"
+              size="small"
+              className="clear-button"
+            >
+              Clear Editor
+            </Button>
           </div>
         </div>
+        <Card className="files-card">
+          <Typography variant="subtitle2" sx={{ p: 1, fontWeight: 'bold' }}>
+            Pages
+          </Typography>
+          <div className="files-list" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+            {pages && pages.length > 0 ? (
+              pages.map((page, index) => (
+                <Typography key={index} variant="body2" sx={{ px: 1, pb: 0.5 }}>
+                  {page}
+                </Typography>
+              ))
+            ) : (
+              <Typography variant="body2" sx={{ px: 1, pb: 0.5, fontStyle: 'italic' }}>
+                No pages available
+              </Typography>
+            )}
+          </div>
+        </Card>
         <div className="markdown-container">
           {testCases && testCases.features ? (
             <GherkinViewer data={testCases} />

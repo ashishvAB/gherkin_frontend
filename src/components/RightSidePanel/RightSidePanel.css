@@ -19,19 +19,21 @@
   font-size: 1rem;
 }
 .clear-editor-btn-container {
+  margin-top: 100px;
   display: flex;
   width: 45%;
   margin-bottom: 1rem;
 }
 
 .markdown-container {
-padding: 16px;
-background-color: #f9f9f9; /* Light background for Markdown */
-border: 1px solid #ddd; /* Border for styling */
-border-radius: 4px;
-font-family: 'Courier New', Courier, monospace; /* Use monospace for Gherkin content */
-overflow-y: auto;
-max-height: 100vh; /* Set a maximum height for scrollability */
+  margin-top: 20px; /* Added margin to position 500px down */
+  padding: 16px;
+  background-color: #f9f9f9; /* Light background for Markdown */
+  border: 1px solid #ddd; /* Border for styling */
+  border-radius: 4px;
+  font-family: 'Courier New', Courier, monospace; /* Use monospace for Gherkin content */
+  overflow-y: auto;
+  max-height: 100vh; /* Set a maximum height for scrollability */
 }
 
 .markdown-container h2, .markdown-container h3 {
@@ -53,11 +55,11 @@ color: #333;
 .files-card {
   position: absolute;
   top: 10px;
-  right: 120px;
+  right: 20px;
   min-width: 500px;
   max-width: 300px;
-  max-height: 500px;
-  overflow-y: auto;
+  max-height: 400px;
+ 
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
