@@ -12,6 +12,7 @@ function Projects() {
     name: '',
     figmaUrl: ''
   });
+  const [isCreating, setIsCreating] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,6 +41,7 @@ function Projects() {
 
   const createProject = async (e) => {
     e.preventDefault();
+    setIsCreating(true);
     try {
       const project = await projectService.createProject({
         name: newProject.name,
@@ -52,6 +54,8 @@ function Projects() {
       if (error.response?.status === 401) {
         navigate('/login');
       }
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -102,8 +106,9 @@ function Projects() {
           placeholder="Figma URL"
           required
         />
-        <button type="submit">Create Project</button>
+        <button type="submit" disabled={isCreating}>Create Project</button>
       </form>
+      {isCreating && <div className="loading-spinner">Creating project...</div>}
 
       <div className="projects-grid">
         {isLoading ? (
