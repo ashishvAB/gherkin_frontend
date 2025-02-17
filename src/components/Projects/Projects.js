@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { projectService } from '../../services/projectService';
 import { authService } from '../../services/authService';
+import DeleteIcon from '@mui/icons-material/Delete';
 import './Projects.css';
 
 function Projects() {
@@ -60,6 +61,19 @@ function Projects() {
     navigate('/login');
   };
 
+  const handleDeleteProject = async (projectId, e) => {
+    e.stopPropagation();
+    
+    if (window.confirm('Are you sure you want to delete this project?')) {
+      try {
+        await projectService.deleteProject(projectId);
+        setProjects(projects.filter(project => project.id !== projectId));
+      } catch (error) {
+        console.error('Error deleting project:', error);
+      }
+    }
+  };
+
   return (
     <div className="projects-container">
       <div className="header-container">
@@ -81,7 +95,7 @@ function Projects() {
           type="url"
           value={newProject.figmaUrl}
           onChange={(e) => setNewProject({...newProject, figmaUrl: e.target.value})}
-          placeholder="Description"
+          placeholder="Figma URL"
           required
         />
         <button type="submit">Create Project</button>
@@ -94,7 +108,16 @@ function Projects() {
             className="project-card"
             onClick={() => handleProjectClick(project.id)}
           >
-            <h3>{project.project_name}</h3>
+            <div className="project-card-header">
+              <h3>{project.project_name}</h3>
+              <button 
+                className="delete-button"
+                onClick={(e) => handleDeleteProject(project.id, e)}
+                title="Delete project"
+              >
+                <DeleteIcon sx={{ fontSize: 20 }} />
+              </button>
+            </div>
             <p>Status: {project.status}</p>
             <p>Created: {new Date(project.created_at).toLocaleDateString()}</p>
           </div>

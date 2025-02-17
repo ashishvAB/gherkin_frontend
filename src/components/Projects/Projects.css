@@ -1,6 +1,6 @@
 .projects-container {
   padding: 2rem;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -52,6 +52,7 @@
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   position: relative;
+  overflow: hidden;
 }
 
 .project-card:hover {
@@ -71,20 +72,51 @@
   font-size: 0.9rem;
 }
 
+.project-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.project-card-header h3 {
+  margin: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .delete-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 5px 10px;
-  background-color: #ff4444;
-  color: white;
+  background: none;
   border: none;
-  border-radius: 4px;
+  color: #EF4444;
   cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 0.8;
+  flex-shrink: 0;
+  margin-top: -4px;
 }
 
 .delete-button:hover {
-  background-color: #cc0000;
+  background-color: rgba(239, 68, 68, 0.1);
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+.delete-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.project-card:hover .delete-button {
+  opacity: 1;
 }
 
 .delete-button-small {

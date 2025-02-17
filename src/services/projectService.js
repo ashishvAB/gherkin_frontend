@@ -3,6 +3,17 @@ import { authHeader } from '../utils/authHeader';
 
 const API_URL = (process.env.API_URL || 'https://gherkin-backend.onrender.com/api') +'/projects';
 
+const deleteProject = async (projectId) => {
+    try {
+        const response = await axios.delete(`${API_URL}/${projectId}`, {
+            headers: authHeader()
+        });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+};
+
 export const projectService = {
     async createProject(projectData) {
         try {
@@ -64,8 +75,5 @@ export const projectService = {
         }
     },
 
-    async deleteProject(projectId) {
-        const response = await axios.delete(`${API_URL}/${projectId}`);
-        return response.data;
-    }
+    deleteProject,
 }; 
