@@ -27,6 +27,9 @@ import IconButton from '@mui/material/IconButton';
 3. 
 
 */
+const CHAT_API_URL = (process.env.API_URL || 'https://gherkin-backend.onrender.com/api') + '/chat';
+const GHERKIN_API_URL = (process.env.API_URL || 'https://gherkin-backend.onrender.com/api') + '/gherkin';
+
 
 
 function LeftSidePanel({ onTestCasesGenerated }) {
@@ -107,7 +110,7 @@ function LeftSidePanel({ onTestCasesGenerated }) {
       }
 
       const response = await axios.post(
-        "http://localhost:8000/api/gherkin/from_figma", 
+        `${GHERKIN_API_URL}/from_figma`, 
         Client,  // Now includes both url and project_id
         {
           headers: {
@@ -154,7 +157,7 @@ function LeftSidePanel({ onTestCasesGenerated }) {
     try {
       
       setUploadStatus('Processing URL...');
-      const response = await axios.post("http://localhost:8000/api/gherkin/from_image", Client, {
+      const response = await axios.post(`${GHERKIN_API_URL}/from_image`, Client, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -192,7 +195,7 @@ function LeftSidePanel({ onTestCasesGenerated }) {
     try {
       setUploadStatus('Uploading...');
       const token = localStorage.getItem('token');
-      const response = await axios.post('http://localhost:8000/api/gherkin/upload_file', formData, 
+      const response = await axios.post(`${GHERKIN_API_URL}/upload_file`, formData, 
       { 
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -253,7 +256,7 @@ function LeftSidePanel({ onTestCasesGenerated }) {
     setMessage('');
     try {
 
-      const response = await axios.post('http://localhost:8000/api/chat/', {
+      const response = await axios.post(`${CHAT_API_URL}`, {
             message: message,
             project_id: projectId
         }, {
@@ -345,7 +348,7 @@ function LeftSidePanel({ onTestCasesGenerated }) {
   const handleViewTestCases = async (messageId) => {
     try {
       console.log("msgid",messageId)
-      const response = await axios.get(`http://localhost:8000/api/gherkin/messages/${messageId}`);
+      const response = await axios.get(`${GHERKIN_API_URL}/messages/${messageId}`);
       if (response.data) {
         // console.log(response)
         onTestCasesGenerated(JSON.parse(response.data));
