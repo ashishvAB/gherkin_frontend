@@ -15,6 +15,8 @@ import './LeftSidePanel.css';
 import ReactMarkdown from 'react-markdown';
 import { authHeader } from '../../utils/authHeader';
 import { useParams } from 'react-router-dom';
+import { chatService } from '../../services/chatService';
+import { gherkinService } from '../../services/gherkinService';
 
 // Add these imports at the top
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -87,93 +89,39 @@ function LeftSidePanel({ onTestCasesGenerated }) {
    */
   // send url to : http://localhost:8000/api/gherkin/from_figma
   const handleUrlSubmit = async () => {
-    let Client = {
-      "url": url,
-      "project_id": projectId  // Add project_id to the request payload
-    }
-    console.log("Sending request for Figma.........from UI")
-    console.log("Client UI object::", Client)
-
     try {
       setUploadStatus('Processing URL...');
-      const token = localStorage.getItem('token');
+      const response = await gherkinService.processFromFigma(url, projectId);
       
-      // Debug log to check if token exists
-      console.log("Token available:", !!token);
-      
-      if (!token) {
-        setChatMessages(prev => [...prev, { 
-          type: 'error', 
-          content: 'Please log in to continue.' 
-        }]);
-        return;
-      }
-
-      const response = await axios.post(
-        `${GHERKIN_API_URL}/from_figma`, 
-        Client,  // Now includes both url and project_id
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-        }
-      );
-      console.log("Token available2time:", !!token);
-      if (response.data) {
-        // onTestCasesGenerated(response.data);
+      if (response) {
         setUrlDialogOpen(false);
         setUrl('');
-        setChatMessages(prev => [...prev, { type: 'system', content: response.data }]);
+        setChatMessages(prev => [...prev, { type: 'system', content: response }]);
       }
     } catch (error) {
       setUploadStatus('Error processing URL');
-      console.error('Error processing URL:', error);
-      
-      if (error.response?.status === 401) {
-        // Clear token if it's invalid
-        // localStorage.removeItem('token');
-        setChatMessages(prev => [...prev, { 
-          type: 'error', 
-          content: 'Your session has expired. Please log in again.' 
-        }]);
-      } else {
-        setChatMessages(prev => [...prev, { 
-          type: 'error', 
-          content: `Error: ${error.response?.data?.detail || 'Something went wrong'}` 
-        }]);
-      }
+      handleError(error);
     }
   };
 
   const handleUrlSubmitImage = async () => {
-    let Client = {
-      "url": url
-    }
-    console.log("Sending Image Processing request......from UI")
-    console.log("Client UI object::", Client)
-    // if (!Client.url.trim()) return;
-
     try {
-      
       setUploadStatus('Processing URL...');
-      const response = await axios.post(`${GHERKIN_API_URL}/from_image`, Client, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await gherkinService.processFromImage(url);
       
-      if (response.data) {
+      if (response) {
         setUploadStatus('Image processed successfully!');
-        onTestCasesGenerated(response.data);
+        onTestCasesGenerated(response);
         setUrlDialogOpen(false);
         setUrl('');
-        setChatMessages(prev => [...prev, { type: 'system', content: 'Test cases generated successfully!' }]);
+        setChatMessages(prev => [...prev, { 
+          type: 'system', 
+          content: 'Test cases generated successfully!' 
+        }]);
       }
     } catch (error) {
       setUploadStatus('Error processing Image');
-      console.error('Error processing Image:', error);
-      setChatMessages(prev => [...prev, { type: 'error', content: 'Error processing Image. Please try again.' }]);
+      handleError(error);
     }
   };
   // send files to : http://localhost:8000/api/gherkin/from_text
@@ -194,19 +142,11 @@ function LeftSidePanel({ onTestCasesGenerated }) {
 
     try {
       setUploadStatus('Uploading...');
-      const token = localStorage.getItem('token');
-      const response = await axios.post(`${GHERKIN_API_URL}/upload_file`, formData, 
-      { 
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}`
-        },
-      });
+      const response = await gherkinService.uploadFile(formData);
       
-      if (response.data) {
-        console.log("Upload File Successfully and Response is:", response.data)
+      if (response) {
+        console.log("Upload File Successfully and Response is:", response)
         setUploadStatus('Upload successful!');
-        // onTestCasesGenerated(response.data); // pass the response data to the parent component to display on the right side panel
         setUploadedFiles(prev => 
           prev.map(file => 
             acceptedFiles.some(af => af.name === file.name)
@@ -214,10 +154,14 @@ function LeftSidePanel({ onTestCasesGenerated }) {
               : file
           )
         );
-        setChatMessages(prev => [...prev, { type: 'system', content: `Files uploaded successfully: ${acceptedFiles.map(f => f.name).join(', ')}` }]);
+        setChatMessages(prev => [...prev, { 
+          type: 'system', 
+          content: `Files uploaded successfully: ${acceptedFiles.map(f => f.name).join(', ')}` 
+        }]);
       }
     } catch (error) {
       setUploadStatus('Upload failed');
+      handleError(error);
       setUploadedFiles(prev => 
         prev.map(file => 
           acceptedFiles.some(af => af.name === file.name)
@@ -225,8 +169,6 @@ function LeftSidePanel({ onTestCasesGenerated }) {
             : file
         )
       );
-      console.error('Error uploading files:', error);
-      setChatMessages(prev => [...prev, { type: 'error', content: 'Error uploading files. Please try again.' }]);
     }
   }, []);
 
@@ -245,137 +187,92 @@ function LeftSidePanel({ onTestCasesGenerated }) {
       event.preventDefault();
     }
     if (!message.trim()) return;
-    setChatMessages(prev => [
-      ...prev,
-      {
-          type: 'user',
-          content: message,
-          timestamp: new Date().toISOString()
-      },
-    ]);
+
+    setChatMessages(prev => [...prev, {
+      type: 'user',
+      content: message,
+      timestamp: new Date().toISOString()
+    }]);
+
+    const currentMessage = message;
     setMessage('');
+
     try {
-
-      const response = await axios.post(`${CHAT_API_URL}`, {
-            message: message,
-            project_id: projectId
-        }, {
-            headers: authHeader()
-      });
-
-      if (response.data) {
-        try {
-          const botMessageId = response.data.chat_id;
-          let parsedResponse;
-          if (typeof response.data.response === 'string') {
-            try {
-              parsedResponse = JSON.parse(response.data.response);
-            } catch (e) {
-              parsedResponse = response.data.response;
-            }
-          } else {
-            parsedResponse = response.data.response;
-          }
-          // console.log("What is returned::", response.data)
-          // Check if response is JSON with features
-          if (parsedResponse && typeof parsedResponse === 'object' && parsedResponse.features) {
-            // Store the JSON response
-            setStoredResponses(prev => ({
-              ...prev,
-              [botMessageId]: parsedResponse
-            }));
-            
-            // Send to RightPanel
-            onTestCasesGenerated(parsedResponse);
-            
-            // Add success message to chat with arrow button
-            setChatMessages(prev => [
-              ...prev,
-              {
-                id: botMessageId,
-                type: 'bot',
-                content: "Test cases generated successfully!",
-                hasTestCases: true
-              }
-            ]);
-          } else {
-            // Handle regular text responses
-            setChatMessages(prev => [
-              ...prev,
-              {
-                id: botMessageId,
-                type: 'bot',
-                content: typeof parsedResponse === 'string' ? 
-                  parsedResponse : 
-                  JSON.stringify(parsedResponse, null, 2),
-                hasTestCases: false
-              }
-            ]);
-          }
-        } catch (error) {
-          console.error('Error parsing response:', error);
-          setChatMessages(prev => [
-            ...prev,
-            {
-                        type: 'user',
-                        content: message,
-                        timestamp: new Date().toISOString()
-                    },
-                    {
-              type: 'bot',
-                        content: "Error: Unable to process response.",
-                        timestamp: new Date().toISOString(),
-              hasTestCases: false
-            }
-          ]);
-        }
-      }
-        setMessage('');
+      const response = await chatService.sendMessage(currentMessage, projectId);
+      handleChatResponse(response);
     } catch (error) {
-      console.error('Error sending message:', error);
-      setChatMessages(prev => [
-        ...prev,
-            {
-          type: 'bot',
-          content: "Error: Unable to send message.",
-                timestamp: new Date().toISOString(),
-          hasTestCases: false
-        }
-      ]);
+      handleError(error);
     }
   };
 
   const handleViewTestCases = async (messageId) => {
     try {
-      console.log("msgid",messageId)
-      const response = await axios.get(`${GHERKIN_API_URL}/messages/${messageId}`);
-      if (response.data) {
-        // console.log(response)
-        onTestCasesGenerated(JSON.parse(response.data));
+      const response = await gherkinService.getMessageTestCases(messageId);
+      if (response) {
+        onTestCasesGenerated(JSON.parse(response));
       }
     } catch (error) {
-      console.error('Error fetching test cases:', error);
-      // You might want to show an error message to the user here
+      handleError(error);
     }
   };
 
-  // Update the chat messages rendering
-  // const renderMessage = (msg) => (
-  //   <div>
-  //     <div className={`chat-message ${msg.type}`}>
-  //       <ReactMarkdown>{msg.content}</ReactMarkdown>
-  //     </div>
-  //     {msg.hasTestCases && (
-  //       <IconButton
-  //         size="small"
-  //         onClick={() => handleViewTestCases(msg.id)}
-  //         className="view-test-cases-button"
-  //       >
-  //         <ArrowForwardIcon fontSize="small" />
-  //       </IconButton>
-  //     )}
-  //   </div>
-  // );
+  const handleError = (error) => {
+    console.error('Error:', error);
+    setChatMessages(prev => [...prev, { 
+      type: 'error', 
+      content: `Error: ${error?.detail || 'Something went wrong'}` 
+    }]);
+  };
+
+  const handleChatResponse = (response) => {
+    if (!response) return;
+
+    try {
+        const botMessageId = response.chat_id;
+        let parsedResponse;
+
+        // Check if response.response is already an object
+        if (typeof response.response === 'object') {
+            parsedResponse = response.response;
+        } else {
+            // Try to parse as JSON, if it fails, treat as plain text
+            try {
+                parsedResponse = JSON.parse(response.response);
+            } catch (e) {
+                // If parsing fails, use the response as plain text
+                parsedResponse = response.response;
+            }
+        }
+
+        if (parsedResponse && typeof parsedResponse === 'object' && parsedResponse.features) {
+            setStoredResponses(prev => ({
+                ...prev,
+                [botMessageId]: parsedResponse
+            }));
+            
+            onTestCasesGenerated(parsedResponse);
+            
+            setChatMessages(prev => [...prev, {
+                id: botMessageId,
+                type: 'bot',
+                content: "Test cases generated successfully!",
+                hasTestCases: true
+            }]);
+        } else {
+            // Handle plain text or other non-feature responses
+            setChatMessages(prev => [...prev, {
+                id: botMessageId,
+                type: 'bot',
+                content: typeof parsedResponse === 'string' 
+                    ? parsedResponse 
+                    : JSON.stringify(parsedResponse, null, 2),
+                hasTestCases: false
+            }]);
+        }
+    } catch (error) {
+        handleError(error);
+    }
+  };
 
   return (
     <div className="left-side-panel" {...getRootProps()}>
@@ -429,11 +326,6 @@ function LeftSidePanel({ onTestCasesGenerated }) {
           </>
         ))}
         
-        {/* {chatMessages.map((msg) => (
-          <div key={msg.id} >
-            {renderMessage(msg)}
-          </div>
-        ))} */}
         {uploadStatus && <div className="upload-status">{uploadStatus}</div>}
       </div>
       <div className="chat-input">

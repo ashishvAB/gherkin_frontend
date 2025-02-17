@@ -81,7 +81,7 @@ function Projects() {
           type="url"
           value={newProject.figmaUrl}
           onChange={(e) => setNewProject({...newProject, figmaUrl: e.target.value})}
-          placeholder="Figma URL"
+          placeholder="Description"
           required
         />
         <button type="submit">Create Project</button>

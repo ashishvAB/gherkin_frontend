@@ -1,14 +1,14 @@
 import axios from 'axios';
 import { authHeader } from '../utils/authHeader';
 
-const API_URL = (process.env.API_URL || 'https://gherkin-backend.onrender.com/api') + '/chat';
+const CHAT_API_URL = (process.env.API_URL || 'https://gherkin-backend.onrender.com/api') + '/chat';
 
 export const chatService = {
     async getChatHistory() {
         try {
-            const response = await axios.get(`${API_URL}/history`, {
+            const response = await axios.get(`${CHAT_API_URL}/history`, {
                 headers: authHeader()
-            });
+            }); 
             return response.data;
         } catch (error) {
             console.error('Error fetching chat history:', error);
@@ -16,17 +16,17 @@ export const chatService = {
         }
     },
 
-    async sendMessage(message) {
+    async sendMessage(message, projectId) {
         try {
-            const response = await axios.post(API_URL, {
-                message: message
+            const response = await axios.post(CHAT_API_URL, {
+                message: message,
+                project_id: projectId
             }, {
                 headers: authHeader()
             });
             return response.data;
         } catch (error) {
-            console.error('Error sending message:', error);
-            throw error;
+            throw error.response?.data || error.message;
         }
     },
 
@@ -36,7 +36,7 @@ export const chatService = {
 
         try {
             const response = await axios.post(
-                `${API_URL}/${projectId}/attachment`,
+                `${CHAT_API_URL}/${projectId}/attachment`,
                 formData,
                 {
                     headers: {
