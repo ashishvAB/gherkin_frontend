@@ -1,38 +1,35 @@
 // import React from 'react';
 // import './RightSidePanel.css';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import './RightSidePanel.css';
-import { Button } from '@mui/material';
+import { Button, Card, Typography } from '@mui/material';
 import GherkinViewer from '../GherkinViewer';
+import { projectService } from '../../services/projectService';
 
 
-// function RightSidePanel({ messages }) {
-//     return (
-//         <div className="right-panel">
-//             <div className="panel-header">
-//                 <h2>Test Cases</h2>
-//                 <button className="clear-editor-btn">CLEAR EDITOR</button>
-//             </div>
-            
-//             <div className="test-cases-container">
-//                 {messages.map((message, index) => (
-//                     <div key={index} className="test-case">
-//                         <div className="test-case-header">
-//                             {message.title || 'Test Case'}
-//                             <span className="collapse-btn">^</span>
-//                         </div>
-//                         <div className="test-case-content">
-//                             <pre>{message.text}</pre>
-//                         </div>
-//                     </div>
-//                 ))}
-//             </div>
-//         </div>
-//     );
-// }
-function RightSidePanel({ testCases, onClearEditor }) {
+function RightSidePanel({ testCases, onClearEditor}) {
+    const { projectId } = useParams();
+    const [pages, setPages] = useState([]);
+    
+    useEffect(() => {
+        const fetchPages = async () => {
+            try {
+                const pagesData = await projectService.getPages(projectId);
+                console.log('Fetched pages:', pagesData);
+                setPages(pagesData);
+            } catch (error) {
+                console.error('Error fetching pages:', error);
+            }
+        };
+        
+        if (projectId) {
+            fetchPages();
+        }
+    }, [projectId]);
+
     const handleClearEditor = () => {
       onClearEditor('');
     }
@@ -41,6 +38,26 @@ function RightSidePanel({ testCases, onClearEditor }) {
       <div className="right-side-panel">
         <div className="header">
           <div className="title">Test Cases</div>
+          <Card className="files-card">
+            <Typography variant="subtitle2" sx={{ p: 1, fontWeight: 'bold' }}>
+              Pages
+            </Typography>
+
+            <div className="files-list">
+              {pages && pages.length > 0 ? (
+                pages.map((page, index) => (
+                  <Typography key={index} variant="body2" sx={{ px: 1, pb: 0.5 }}>
+                    {page.name}
+                  </Typography>
+                ))
+              ) : (
+                <Typography variant="body2" sx={{ px: 1, pb: 0.5, fontStyle: 'italic' }}>
+                  No pages available
+                </Typography>
+              )}
+            </div>
+            
+          </Card>
           <div className="clear-editor-btn-container">  
           <Button 
             onClick={handleClearEditor}

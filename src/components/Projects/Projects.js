@@ -7,6 +7,7 @@ import './Projects.css';
 
 function Projects() {
   const [projects, setProjects] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [newProject, setNewProject] = useState({
     name: '',
     figmaUrl: ''
@@ -24,6 +25,7 @@ function Projects() {
 
   const loadProjects = async () => {
     try {
+      setIsLoading(true);
       const data = await projectService.getProjects();
       setProjects(data);
     } catch (error) {
@@ -31,6 +33,8 @@ function Projects() {
       if (error.response?.status === 401) {
         navigate('/login');
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -102,26 +106,30 @@ function Projects() {
       </form>
 
       <div className="projects-grid">
-        {projects.map((project) => (
-          <div
-            key={project.id}
-            className="project-card"
-            onClick={() => handleProjectClick(project.id)}
-          >
-            <div className="project-card-header">
-              <h3>{project.project_name}</h3>
-              <button 
-                className="delete-button"
-                onClick={(e) => handleDeleteProject(project.id, e)}
-                title="Delete project"
-              >
-                <DeleteIcon sx={{ fontSize: 20 }} />
-              </button>
+        {isLoading ? (
+          <div>Loading projects...</div>
+        ) : (
+          projects.map((project) => (
+            <div
+              key={project.id}
+              className="project-card"
+              onClick={() => handleProjectClick(project.id)}
+            >
+              <div className="project-card-header">
+                <h3>{project.project_name}</h3>
+                <button 
+                  className="delete-button"
+                  onClick={(e) => handleDeleteProject(project.id, e)}
+                  title="Delete project"
+                >
+                  <DeleteIcon sx={{ fontSize: 20 }} />
+                </button>
+              </div>
+              <p>Status: {project.status}</p>
+              <p>Created: {new Date(project.created_at).toLocaleDateString()}</p>
             </div>
-            <p>Status: {project.status}</p>
-            <p>Created: {new Date(project.created_at).toLocaleDateString()}</p>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

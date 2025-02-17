@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
 import SendIcon from '@mui/icons-material/Send';
@@ -44,6 +44,7 @@ function LeftSidePanel({ onTestCasesGenerated }) {
   const [urlDialogOpen, setUrlDialogOpen] = useState(false);
   const [url, setUrl] = useState('');
   const [storedResponses, setStoredResponses] = useState({});
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
   const getFileIcon = (fileName) => {
     const extension = fileName.split('.').pop().toLowerCase();
@@ -274,6 +275,36 @@ function LeftSidePanel({ onTestCasesGenerated }) {
     }
   };
 
+  useEffect(() => {
+    const loadChatHistory = async () => {
+      try {
+        setIsLoadingHistory(true);
+        const history = await chatService.getChatHistory(projectId);
+        if (history && history.length > 0) {
+          setChatMessages(history.map(msg => ({
+            id: msg.id,
+            type: msg.role === 'user' ? 'user' : 'bot',
+            content: msg.content,
+            hasTestCases: msg.has_test_cases,
+            timestamp: msg.timestamp
+          })));
+        }
+      } catch (error) {
+        console.error('Error loading chat history:', error);
+        setChatMessages(prev => [...prev, {
+          type: 'error',
+          content: 'Failed to load chat history'
+        }]);
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    };
+
+    if (projectId) {
+      loadChatHistory();
+    }
+  }, [projectId]);
+
   return (
     <div className="left-side-panel" {...getRootProps()}>
       <input {...getInputProps()} />
@@ -310,21 +341,25 @@ function LeftSidePanel({ onTestCasesGenerated }) {
             Clear All
           </button>
         </div>
-        {chatMessages.map((msg) => (
-          <>
-            <ReactMarkdown key={msg.id} className={`chat-message ${msg.type}`} children={msg.content} />
-            {msg.hasTestCases && (
-              <IconButton
-                size="small"
-                onClick={() => handleViewTestCases(msg.id)}
-                sx={{ ml: 1 }}
-                className="view-test-cases-button"
-              >
-                <ArrowForwardIcon fontSize="small" />
-              </IconButton>
-            )}
-          </>
-        ))}
+        {isLoadingHistory ? (
+          <div className="chat-message system">Loading chat history...</div>
+        ) : (
+          chatMessages.map((msg) => (
+            <>
+              <ReactMarkdown key={msg.id} className={`chat-message ${msg.type}`} children={msg.content} />
+              {msg.hasTestCases && (
+                <IconButton
+                  size="small"
+                  onClick={() => handleViewTestCases(msg.id)}
+                  sx={{ ml: 1 }}
+                  className="view-test-cases-button"
+                >
+                  <ArrowForwardIcon fontSize="small" />
+                </IconButton>
+              )}
+            </>
+          ))
+        )}
         
         {uploadStatus && <div className="upload-status">{uploadStatus}</div>}
       </div>

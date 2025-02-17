@@ -20,7 +20,7 @@ export const projectService = {
             const response = await axios.post(API_URL, {
                 project_name: projectData.name,
                 figma_url: projectData.figmaUrl,
-                status: 'processing'
+                status: 'active'
             }, {
                 headers: authHeader()
             });
@@ -74,6 +74,15 @@ export const projectService = {
             throw error.response?.data || error.message;
         }
     },
-
+    async getPages(projectId) {
+        try {
+            const response = await axios.get(`${API_URL}/${projectId}/pages`, {
+                headers: authHeader()
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
     deleteProject,
 }; 
