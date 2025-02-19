@@ -1,12 +1,13 @@
 import axios from 'axios';
 import { authHeader } from '../utils/authHeader';
 
-const CHAT_API_URL = (process.env.REACT_APP_API_URL || 'https://gherkin-backend.onrender.com/api') + '/chat';
+const CHAT_API_URL =  'http://localhost:8000/api'+ '/chat';
 
-export const chatService = {
-    async getChatHistory() {
+export const chatService = { 
+    async getChatHistory(projectId) {
         try {
-            const response = await axios.get(`${CHAT_API_URL}/history`, {
+            console.log("Project ID in Service ..is:", projectId);
+            const response = await axios.get(`${CHAT_API_URL}/history/${projectId}`, {
                 headers: authHeader()
             }); 
             return response.data;

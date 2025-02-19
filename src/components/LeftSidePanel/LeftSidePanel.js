@@ -277,17 +277,24 @@ function LeftSidePanel({ onTestCasesGenerated }) {
 
   useEffect(() => {
     const loadChatHistory = async () => {
+      if (!projectId) return; // Wait until projectId is defined
+
       try {
         setIsLoadingHistory(true);
-        const history = await chatService.getChatHistory(projectId);
-        if (history && history.length > 0) {
-          setChatMessages(history.map(msg => ({
-            id: msg.id,
-            type: msg.role === 'user' ? 'user' : 'bot',
-            content: msg.content,
-            hasTestCases: msg.has_test_cases,
-            timestamp: msg.timestamp
-          })));
+        const response = await chatService.getChatHistory(projectId);
+        console.log("History is:", response);
+
+        // Process the response to extract messages
+        if (response.messages && response.messages.length > 0) {
+          const formattedMessages = response.messages.flatMap(msg => 
+            msg.messages.map(message => ({
+              id: msg.id,
+              type: message.type,
+              content: message.content,
+              timestamp: message.timestamp
+            }))
+          );
+          setChatMessages(formattedMessages);
         }
       } catch (error) {
         console.error('Error loading chat history:', error);
@@ -300,9 +307,7 @@ function LeftSidePanel({ onTestCasesGenerated }) {
       }
     };
 
-    if (projectId) {
-      loadChatHistory();
-    }
+    loadChatHistory(); // Call the function directly
   }, [projectId]);
 
   return (
