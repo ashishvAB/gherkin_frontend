@@ -275,6 +275,7 @@ function LeftSidePanel({ onTestCasesGenerated }) {
     }
   };
 
+  //load last 5 chat history
   useEffect(() => {
     const loadChatHistory = async () => {
       if (!projectId) return; // Wait until projectId is defined
@@ -290,8 +291,9 @@ function LeftSidePanel({ onTestCasesGenerated }) {
             msg.messages.map(message => ({
               id: msg.id,
               type: message.type,
-              content: message.content,
-              timestamp: message.timestamp
+              content: message.hasTestCases ? "Test Case generated successfully" : message.content,
+              timestamp: message.timestamp,
+              hasTestCases: message.hasTestCases
             }))
           );
           setChatMessages(formattedMessages);

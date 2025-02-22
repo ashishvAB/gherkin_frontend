@@ -11,6 +11,7 @@ export const chatService = {
             const response = await axios.get(`${CHAT_API_URL}/history/${projectId}`, {
                 headers: authHeader()
             }); 
+            console.log("Chat History response in service:", response.data);
             return response.data;
         } catch (error) {
             console.error('Error fetching chat history:', error);
